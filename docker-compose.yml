@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: novely-peak-postgres
+    environment:
+      POSTGRES_USER: novely_admin
+      POSTGRES_PASSWORD: peak_password
+      POSTGRES_DB: novely_peak_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - novely_peak_data:/var/lib/postgresql/data
+
+volumes:
+  novely_peak_data:
