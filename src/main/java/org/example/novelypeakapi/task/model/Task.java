@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.novelypeakapi.user.model.User;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -33,6 +35,9 @@ public class Task {
     @Column(length = 20)
     private Status status = Status.PENDING;
 
+    @Column(name = "links", columnDefinition = "varchar(255)[]")
+    private List<String> links;
+
     @Column(name = "due_date")
     private LocalDateTime dueDate;
 
@@ -45,15 +50,32 @@ public class Task {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-}
 
-enum Priority{
-    LOW,
-    MEDIUM,
-    HIGH
-}
+    @Builder.Default
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subtask> subtasks = new ArrayList<>();
 
-enum Status {
-    PENDING,
-    DONE
+    public void addSubtask(Subtask subtask) {
+        this.subtasks.add(subtask);
+        subtask.setTask(this);
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public enum Priority {
+        LOW, MEDIUM, HIGH
+    }
+
+    public enum Status {
+        PENDING, DONE
+    }
 }
